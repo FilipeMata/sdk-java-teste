@@ -1,6 +1,5 @@
 package br.com.gerencianet.gnsdk;
 
-import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -14,36 +13,36 @@ import org.json.JSONTokener;
 
 
 public class Endpoints {
-	private final String version = "1.0.0";
-	private String token;
-	private HashMap<String, String> credentials;
+	private APIRequest requester;
 	private JSONObject endpoints;
-	private JSONObject urls;
 	
-	public Endpoints(HashMap<String, String> options) throws FileNotFoundException {
-		this.token = null;
-		this.credentials = options;
+	public Endpoints(JSONObject options) throws Exception 
+	{
+		this.requester = new APIRequest(options);
+
 		JSONTokener tokener = new JSONTokener(getClass().getResourceAsStream("/config.json"));
 		JSONObject config = new JSONObject(tokener);
 		this.endpoints = (JSONObject)config.get("ENDPOINTS");
-		this.urls = (JSONObject)config.get("URL");
-		//System.out.println(this.urls);
 	}
 	
-	public String call(String method, HashMap<String, String> params, String body) throws Exception{
+	public Endpoints(HashMap<String, String> options, APIRequest requester)
+	{
+		this.requester = requester;
+		
+		JSONTokener tokener = new JSONTokener(getClass().getResourceAsStream("/config.json"));
+		JSONObject config = new JSONObject(tokener);
+		this.endpoints = (JSONObject)config.get("ENDPOINTS");
+	}
+	
+	public JSONObject call(String method, HashMap<String, String> params, JSONObject body) throws Exception{
 		if(!this.endpoints.has(method))
 			throw new Exception("nonexistent endpoint");
 		
 		JSONObject endpoint = (JSONObject)this.endpoints.get(method);
 		String route = getRoute(endpoint, params);
 		route += getQueryString(params);
-		return this.request(endpoint.get("method").toString(), route, body);
+		return this.requester.send(endpoint.get("method").toString(), route, body);
 		
-	}
-
-	private String request(String string, String route, String body) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private String getQueryString(HashMap<String, String> params) throws UnsupportedEncodingException {
@@ -74,5 +73,4 @@ public class Endpoints {
     	route = route.substring(0, route.length()-1);
     	return route;
 	}
-
 }

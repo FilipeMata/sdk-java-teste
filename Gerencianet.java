@@ -1,10 +1,9 @@
 package br.com.gerencianet.gnsdk;
 
-import java.io.FileNotFoundException;
-import java.util.HashMap;
+import org.json.JSONObject;
 
 public class Gerencianet extends Endpoints{
-	public Gerencianet(HashMap<String, String> options) throws FileNotFoundException {
+	public Gerencianet(JSONObject options) throws Exception {
 		super(options);
 	}
 }
